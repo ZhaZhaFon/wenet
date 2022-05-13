@@ -5,7 +5,8 @@
 
 # Use this to control how many gpu you use, It's 1-gpu training if you specify
 # just 1gpu, otherwise it's is multiple gpu training based on DDP in pytorch
-export CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
+#export CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
+export CUDA_VISIBLE_DEVICES="1"
 # The NCCL_SOCKET_IFNAME variable specifies which IP interface to use for nccl
 # communication. More details can be found in
 # https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html
@@ -57,19 +58,21 @@ decode_modes="ctc_greedy_search ctc_prefix_beam_search attention attention_resco
 
 . tools/parse_options.sh || exit 1;
 
+# 下载AISHELL-1
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
   echo "stage -1: Data Download"
   local/download_and_untar.sh ${data} ${data_url} data_aishell
   local/download_and_untar.sh ${data} ${data_url} resource_aishell
 fi
 
+# 准备数据列表 生成data/
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
   # Data preparation
   local/aishell_data_prep.sh ${data}/data_aishell/wav \
     ${data}/data_aishell/transcript
 fi
 
-
+# 数据列表处理(去除data/{x}/text里中文transcript的空格) 数据统计(CMVN)
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
   # remove the space between the text labels for Mandarin dataset
   for x in train dev test; do
@@ -85,6 +88,7 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     --out_cmvn data/$train_set/global_cmvn
 fi
 
+# 准备数据 中字=>token 生成data/dict/lang_char.txt
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
   echo "Make a dictionary"
   mkdir -p $(dirname $dict)

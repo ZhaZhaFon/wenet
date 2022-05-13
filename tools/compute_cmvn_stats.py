@@ -47,7 +47,7 @@ class CollateFunc(object):
                 waveform, sample_rate = torchaudio.load(item[1])
 
             waveform = waveform * (1 << 15)
-            if self.resample_rate != 0 and self.resample_rate != sample_rate:
+            if self.resample_rate != 0 and self.resample_rate != sample_rate: # 重采样
                 resample_rate = self.resample_rate
                 waveform = torchaudio.transforms.Resample(
                     orig_freq=sample_rate, new_freq=resample_rate)(waveform)
@@ -57,8 +57,8 @@ class CollateFunc(object):
                               dither=0.0,
                               energy_floor=0.0,
                               sample_frequency=resample_rate)
-            mean_stat += torch.sum(mat, axis=0)
-            var_stat += torch.sum(torch.square(mat), axis=0)
+            mean_stat += torch.sum(mat, axis=0) # 特征均值
+            var_stat += torch.sum(torch.square(mat), axis=0) # 特征方差
             number += mat.shape[0]
         return number, mean_stat, var_stat
 
