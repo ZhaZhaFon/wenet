@@ -101,6 +101,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
   echo "<sos/eos> $num_token" >> $dict
 fi
 
+# 准备数据
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
   echo "Prepare data, prepare requried format"
   for x in dev test ${train_set}; do
